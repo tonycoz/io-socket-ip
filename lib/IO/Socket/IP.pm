@@ -154,6 +154,13 @@ sub import
          die "Cannot socket(PF_INET6) - $!";
 
       if( setsockopt $testsock, IPPROTO_IPV6, IPV6_V6ONLY, 0 ) {
+	 if ($^O eq "dragonfly") {
+	    # dragonflybsd 6.4 lies about successfully turning this off
+	    if (getsockopt $testsock, IPPROTO_IPV6, IPV6_V6ONLY) {
+	       return $can_disable_v6only = 0;
+	    }
+	 }
+	  
          return $can_disable_v6only = 1;
       }
       elsif( $! == EINVAL || $! == EOPNOTSUPP ) {
